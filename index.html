@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" manifest="offline.manifest.php">
+
+	<head>
+		 <meta charset="utf-8">	
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-touch-fullscreen" content="yes">
+		<link rel="apple-touch-icon" href="icon.png" >
+
+		<script type="text/javascript" src="jquery.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function () {
+				var APP_START_FAILED = "I'm sorry, the app can't start right now.";
+
+				/**
+				 * 参数一：从api请求来的压缩的js代码（好out的做法，后期用webpack处理）
+				 * 参数二：bool类型
+				 */
+				function startWithResources(resources, storeResources) {
+					// Try to execute the Javascript
+					try {
+						//eval(resources.js); v6
+						insertScriptAndStyle(resources.js,resources.css);
+						setTimeout(function(){ 
+							APP.applicationController.start(resources, storeResources);					
+						},500);
+
+					// If the Javascript fails to launch, stop execution!
+					} catch (e) {
+						alert(APP_START_FAILED);
+						console.log('%o',e);
+					}
+				}
+				
+				function startWithOnlineResources(resources) {
+					startWithResources(resources, true);
+				}
+
+				function startWithOfflineResources() {
+					console.log("开始离线获取json资源，即是cache/localstorage/web sql");
+					var resources;
+					// If we have resources saved from a previous visit, use them
+					if (localStorage && localStorage.resources) {
+						resources = JSON.parse(localStorage.resources);
+						startWithResources(resources, false);
+
+					// Otherwise, apologize and let the user know
+					} else {
+						alert(APP_START_FAILED);
+					}
+				}
+
+				function insertScriptAndStyle (script,style) {
+					var node = document.createElement('script');
+					node.innerHTML = script;
+					document.head.appendChild(node);
+
+					node=document.createElement('style');
+					node.innerHTML=style;
+					document.head.appendChild(node);
+				}
+
+				// If we know the device is offline, don't try to load new resources
+				if (navigator && navigator.onLine === false) {
+					console.log("进入离线模式");
+					startWithOfflineResources();
+				// Otherwise, download resources, eval them, if successful push them into local storage.
+				} else {	
+					$.ajax({
+						url: 'api/resources/',
+						success: startWithOnlineResources,
+						error: startWithOfflineResources,
+						dataType: 'json'
+					});	
+				}
+
+
+				
+
+			});
+		</script>
+		<title>News</title>
+	</head>
+<body>
+	<div id="loading">Loading&hellip;</div>
+</body>
+</html>
