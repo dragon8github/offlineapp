@@ -24,7 +24,6 @@ APP.applicationController = (function () {
                 APP.articlesController.synchronizeWithServer(offlineWarning);
             }
         });
-
     }
 
     function showArticle(id) {

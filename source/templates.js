@@ -2,7 +2,7 @@ APP.templates = (function () {
     'use strict';
 
     function application() {
-        return '<div id="window"><div id="header"><h1>FT Tech Blog</h1></div><div id="body"></div></div>';
+        return '<div id="window"><div id="header"><h1>我是头部</h1></div><div id="body"></div></div>';
     }
 
     function home() {
